@@ -47,7 +47,7 @@ if /i not "%CONFIRM%"=="Y" exit /b 0
 echo.
 echo [1/10] making restore point...
 powershell -NoProfile -Command "Checkpoint-Computer -Description 'Pre-rhinopill' -RestorePointType 'MODIFY_SETTINGS'" >nul 2>&1
-echo     ok (or system protection's just off, whatever)
+echo     DONE 
 
 :: ---------------------------------------------------------------
 :: power plan
@@ -60,11 +60,11 @@ powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 >nul 2>&1
 for /f "tokens=4" %%i in ('powercfg /list ^| findstr /i "Ultimate"') do set ULTGUID=%%i
 if defined ULTGUID (
     powercfg /setactive %ULTGUID%
-    echo     ultimate perf on
+    echo     ULTIMATE PERFOMANCE ON
 ) else (
     REM fallback for whatever windows sku doesnt expose ultimate (happens sometimes, no idea why)
     powercfg /setactive SCHEME_MIN
-    echo     no ultimate scheme found, used high perf instead
+    echo     NO ULTIMATE SCHEME FOUND, USED HIGH PREF INSTEAD
 )
 
 REM usb selective suspend off, fixes random mouse stutter / wifi dongle drops for me
@@ -73,7 +73,7 @@ powercfg /setactive SCHEME_CURRENT >nul 2>&1
 
 REM hibernation off, dont need it on desktop, frees like 8-16gb depending on ram
 powercfg -h off
-echo     hibernation off, hiberfil.sys gone
+echo  HIBERNATION OFF
 
 :: ---------------------------------------------------------------
 :: visual fx
@@ -89,7 +89,7 @@ reg add "HKCU\Control Panel\Desktop\WindowMetrics" /v MinAnimate /t REG_SZ /d 0 
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarAnimations /t REG_DWORD /d 0 /f >nul
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ListviewAlphaSelect /t REG_DWORD /d 0 /f >nul
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v ListviewShadow /t REG_DWORD /d 0 /f >nul
-echo     done, looks uglier now but whatever
+echo    DONE
 
 :: ---------------------------------------------------------------
 :: game dvr / overlay
@@ -103,12 +103,12 @@ reg add "HKCU\System\GameConfigStore" /v GameDVR_FSEBehaviorMode /t REG_DWORD /d
 reg add "HKCU\System\GameConfigStore" /v GameDVR_HonorUserFSEBehaviorMode /t REG_DWORD /d 1 /f >nul
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v AllowGameDVR /t REG_DWORD /d 0 /f >nul
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v AppCaptureEnabled /t REG_DWORD /d 0 /f >nul
-echo     dvr dead
+echo    DVR, DONE
 
 REM HAGS - hw accelerated gpu scheduling, needs reboot to actually kick in
 REM only really matters on newer gpu drivers, older cards just ignore this key
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v HwSchMode /t REG_DWORD /d 2 /f >nul
-echo     hags flag set (needs reboot, dont forget)
+echo    HAGS FLAG SET
 
 :: ---------------------------------------------------------------
 :: telemetry tasks
@@ -133,13 +133,13 @@ Microsoft\Windows\Windows Error Reporting\QueueReporting
 for %%T in (%TASKS%) do (
     schtasks /Change /TN "%%T" /Disable >nul 2>&1
 )
-echo     bunch of ceip/telemetry tasks off
+echo    DONE, BUNCH OF CEIP/TELEMETRY OFF
 
 REM diagtrack = "connected user experiences and telemetry" service, classic one to kill
 REM does NOT affect windows update despite what some other "debloat" scripts claim
 sc config DiagTrack start= disabled >nul 2>&1
 net stop DiagTrack >nul 2>&1
-echo     diagtrack service disabled
+echo     DIAGTRACK SERVICE DISABLED
 
 :: ---------------------------------------------------------------
 :: services
@@ -154,7 +154,7 @@ sc config Spooler start= demand >nul 2>&1
 sc config Fax start= demand >nul 2>&1
 sc config WSearch start= demand >nul 2>&1
 sc config bthserv start= demand >nul 2>&1
-echo     done. NOT touching defender/firewall/bits/update services
+echo     DONE
 
 :: ---------------------------------------------------------------
 :: network
@@ -174,7 +174,7 @@ for /f "tokens=*" %%K in ('reg query "HKLM\SYSTEM\CurrentControlSet\Services\Tcp
     reg add "%%K" /v TcpAckFrequency /t REG_DWORD /d 1 /f >nul 2>&1
     reg add "%%K" /v TCPNoDelay /t REG_DWORD /d 1 /f >nul 2>&1
 )
-echo     tcp tuned, nagle off on all adapters
+echo     TCP TUNED, NAGLE OFF ALL ADAPTERS
 
 :: ---------------------------------------------------------------
 :: memory
